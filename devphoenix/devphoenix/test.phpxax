@@ -1,0 +1,160 @@
+<?php
+include ("db.php");
+include 'JSON.php';
+$latlon = $_GET["latitude"].",".$_GET["latitude"];
+$latlon1 = $_GET["latlong"];
+$lat = $_GET["latitude"];
+$lon = $_GET["longitude"];
+$datetime = $_GET["date"]." ".$_GET["time"];
+$datetime1 = $_GET["datetime"];
+$daten = date("Y-m-d H:i:s");
+$tambah = mktime(0,0,0,date('m'),date('d') - 1,date('Y'));
+$kemarin = date("Y-m-d", $tambah);
+$sekarang = date("Y-m-d");
+
+Load_updatecycle('3c4e986c210496f9','TEST003','ED2307','-6.234','107.089','0','','0','',$daten,$sekarang,$kemarin,$daten);
+//All_updatecycle('3c4e986c210496f9','TEST003','ED2307','-6.234','107.089','0','','0','',$datetime,$sekarang,$kemarin,$daten);
+
+function Load_updatecycle($device_id,$nip,$unit,$lat,$lon,$speed,$altitude,$accuracy,$heading,$datetime,$sekarang,$kemarin,$daten){
+	$query = mysql_query("SELECT station_id,latitude,longitude FROM sync_station WHERE station_id IN (1,2)");
+	while(list($station_id,$latitude,$longitude)=mysql_fetch_array($query)){
+		$station[$station_id]['lat'] = $latitude;
+		$station[$station_id]['lon'] = $longitude;
+	}
+	// cek date now
+	$query = mysql_query("SELECT cycle_time_id,latitude_start,longitude_start,time_stasiun_cpp,time_stasiun_port FROM log_cycle_time WHERE device_id='".$device_id."' AND nip='".$nip."' AND DATE(`datetime_start`) = '".$sekarang."' order by cycle_time_id desc limit 1");
+	while(list($cycle_time_id,$latitude_start,$longitude_start,$time_stasiun_cpp,$time_stasiun_port)=mysql_fetch_array($query)){
+		if(($latitude_start == $lat)&&($longitude_start == $lon)&&($time_stasiun_cpp != NULL)&&($time_stasiun_port != NULL)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET datetime_end='".$datetime."',latitude_end='".$lat."',longitude_end='".$lon."' WHERE cycle_time_id='".$cycle_time_id."'");
+			if(($time_stasiun_cpp != NULL)&&($time_stasiun_port != NULL)){
+				$resp =  mysql_query("INSERT INTO log_cycle_time(device_id,nip,unit,latitude_start,`longitude_start`,`datetime_start`) VALUES ('".$device_id."','".$nip."','".$unit."','".$lat."','".$lon."','".$datetime."')");
+			}
+		}elseif(($station[1]['lat'] == $lat)&&($station[1]['lon'] == $lon)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET time_stasiun_cpp='".$daten."' WHERE cycle_time_id='".$cycle_time_id."'");
+		}elseif(($station[2]['lat'] == $lat)&&($station[2]['lon'] == $lon)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET time_stasiun_port='".$daten."' WHERE cycle_time_id='".$cycle_time_id."'");
+		}
+	}
+	// cek date kemarin
+	$query = mysql_query("SELECT cycle_time_id,latitude_start,longitude_start FROM log_cycle_time WHERE device_id='".$device_id."' AND nip='".$nip."' AND DATE(`datetime_start`) = '".$kemarin."' order by cycle_time_id desc limit 1");
+	while(list($cycle_time_id,$latitude_start,$longitude_start)=mysql_fetch_array($query)){
+		if(($latitude_start == $lat)&&($longitude_start == $lon)&&($time_stasiun_cpp != NULL)&&($time_stasiun_port != NULL)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET datetime_end='".$datetime."',latitude_end='".$lat."',longitude_end='".$lon."' WHERE cycle_time_id='".$cycle_time_id."'");
+			if(($time_stasiun_cpp != NULL)&&($time_stasiun_port != NULL)){
+				$resp =  mysql_query("INSERT INTO log_cycle_time(device_id,nip,unit,latitude_start,`longitude_start`,`datetime_start`) VALUES ('".$device_id."','".$nip."','".$unit."','".$lat."','".$lon."','".$datetime."')");
+			}
+		}elseif(($station[1]['lat'] == $lat)&&($station[1]['lon'] == $lon)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET time_stasiun_cpp='".$daten."' WHERE cycle_time_id='".$cycle_time_id."'");
+		}elseif(($station[2]['lat'] == $lat)&&($station[2]['lon'] == $lon)){
+			$resp =  mysql_query("UPDATE log_cycle_time SET time_stasiun_port='".$daten."' WHERE cycle_time_id='".$cycle_time_id."'");
+		}
+	}
+}
+
+function All_updatecycle($device_id,$nip,$unit,$lat,$lon,$speed,$altitude,$accuracy,$heading,$datetime,$sekarang,$kemarin,$daten){
+	$query = mysql_query("SELECT station_id,latitude,longitude FROM sync_station WHERE station_id IN (1,2)");
+	while(list($station_id,$latitude,$longitude)=mysql_fetch_array($query)){
+		$station[$station_id]['lat'] = $latitude;
+		$station[$station_id]['lon'] = $longitude;
+	}
+	
+	// menentukan sycle all menggunakan geo
+	$cycletimeAll = 0;
+	$cycletime = 0;
+	$cycletime1 = 0;
+	$cycletime2 = 0;
+	$cycletime3 = 0;
+	$cycletime4 = 0;
+	$jarak = 0;
+	
+	$query = mysql_query("SELECT cycle_time_id,latitude_start,longitude_start,latitude_end,longitude_end,time_stasiun_cpp,time_stasiun_port FROM log_cycle_time WHERE device_id='".$device_id."' AND nip='".$nip."' AND DATE(`datetime_start`) = '".$sekarang."'");
+	while(list($cycle_time_id,$latitude_start,$longitude_start,$latitude_end,$longitude_end,$time_stasiun_cpp,$time_stasiun_port)=mysql_fetch_array($query)){
+		if(($latitude_start == $latitude_end)&&($time_stasiun_port != NULL)&&($time_stasiun_cpp != NULL)){
+			$cycletime++;
+		}else{
+			if(($time_stasiun_port != NULL)&&($time_stasiun_cpp != NULL)){
+				$jarak = distance($station[1]['lat'], $station[1]['lon'], $station[2]['lat'], $station[2]['lon'], 'K');
+				$jarak += distance($latitude_start, $longitude_start, $station[1]['lat'], $station[1]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[2]['lat'], $station[2]['lon'], 'K');
+			}
+			if(($time_stasiun_port == NULL)&&($time_stasiun_cpp != NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $station[2]['lat'], $station[2]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[2]['lat'], $station[2]['lon'], 'K');
+			}
+			if(($time_stasiun_port != NULL)&&($time_stasiun_cpp == NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $station[1]['lat'], $station[1]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[1]['lat'], $station[1]['lon'], 'K');
+			}
+			if(($time_stasiun_port == NULL)&&($time_stasiun_cpp == NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $latitude_end, $longitude_end, 'K');
+			}
+			$cycletime1 = 2 * distance($station[2]['lat'], $station[2]['lon'], $station[1]['lat'], $station[1]['lon'], 'K');
+			//$cycletime1 += distance($station[2]['lat'], $station[2]['lon'], $station[1]['lat'], $station[1]['lon'], 'K');
+			$cycletime3 = number_format($jarak /$cycletime1, 2);
+		}
+	}
+	
+	// kemarin
+	$query = mysql_query("SELECT cycle_time_id,latitude_start,longitude_start,latitude_end,longitude_end FROM log_cycle_time WHERE device_id='".$device_id."'AND nip='".$nip."' AND DATE(`datetime_start`) = '".$kemarin."'");
+	while(list($cycle_time_id,$latitude_start,$longitude_start,$latitude_end,$longitude_end,$time_stasiun_cpp,$time_stasiun_port)=mysql_fetch_array($query)){
+		if($latitude_start == $latitude_end){
+			$cycletime2++;
+		}else{
+			if(($time_stasiun_port != NULL)&&($time_stasiun_cpp != NULL)){
+				$jarak = distance($station[1]['lat'], $station[1]['lon'], $station[2]['lat'], $station[2]['lon'], 'K');
+				$jarak += distance($latitude_start, $longitude_start, $station[1]['lat'], $station[1]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[2]['lat'], $station[2]['lon'], 'K');
+			}
+			if(($time_stasiun_port == NULL)&&($time_stasiun_cpp != NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $station[2]['lat'], $station[2]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[2]['lat'], $station[2]['lon'], 'K');
+			}
+			if(($time_stasiun_port != NULL)&&($time_stasiun_cpp == NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $station[1]['lat'], $station[1]['lon'], 'K');
+				$jarak += distance($latitude_end, $longitude_end, $station[1]['lat'], $station[1]['lon'], 'K');
+			}
+			if(($time_stasiun_port == NULL)&&($time_stasiun_cpp == NULL)){
+				$jarak = distance($latitude_start, $longitude_start, $latitude_end, $longitude_end, 'K');
+			}
+			$cycletime1 = 2 * distance($station[2]['lat'], $station[2]['lon'], $station[1]['lat'], $station[1]['lon'], 'K');
+			//$cycletime1 += distance($station[2]['lat'], $station[2]['lon'], $station[1]['lat'], $station[1]['lon'], 'K');
+			$cycletime4 = number_format($jarak /$cycletime1, 2);
+		}
+	}
+	$cycletimeAll = $cycletime + $cycletime2 + $cycletime3 + $cycletime4;
+	echo $cycletimeAll;
+}
+/*$jarak = 0;
+$jarak += distance('-6.232','107.087','-6.236','107.089','K');
+$jarak += distance('-6.236', '107.088', '-6.232','107.087', 'K');
+$jarak += distance('-6.234', '107.089','-6.236','107.089', 'K');
+
+$cycletime1 = 2 * distance('-6.236','107.089', '-6.232','107.087', 'K');
+//$cycletime1 += distance('-6.236','107.089', '-6.232','107.087', 'K');
+echo $jarak." / ".$cycletime1."<br>";
+$nilai = number_format($jarak /$cycletime1, 2);
+echo $nilai;
+*/
+function distance($lat1, $lon1, $lat2, $lon2, $unit) {
+	$theta = $lon1 - $lon2;
+	$dist = sin(deg2rad($lat1)) * sin(deg2rad($lat2)) +  cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * cos(deg2rad($theta));
+	$dist = acos($dist);
+	$dist = rad2deg($dist);
+	$miles = $dist * 60 * 1.1515;
+	$unit = strtoupper($unit);
+
+	if ($unit == "K") {
+		return ($miles * 1.609344);
+	} else if ($unit == "N") {
+		return ($miles * 0.8684);
+	} else {
+		return $miles;
+	}
+	/*
+	echo distance(32.9697, -96.80322, 29.46786, -98.53506, "M") . " Miles<br>";
+	echo distance(32.9697, -96.80322, 29.46786, -98.53506, "K") . " Kilometers<br>";
+	echo distance(32.9697, -96.80322, 29.46786, -98.53506, "N") . " Nautical Miles<br>";
+	*/
+}
+
+?>

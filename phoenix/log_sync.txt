@@ -1,0 +1,40 @@
+(2017-03-03 17:01:29) ==============================================
+(2017-03-03 17:01:29) id : 1
+(2017-03-03 17:01:29) masuk ke case loggeolocation
+(2017-03-03 17:01:29) nip : KB10004
+(2017-03-03 17:01:29) unit : Testdwi
+(2017-03-03 17:01:29) device_id : 64ed9497054f143
+(2017-03-03 17:01:29) status : login
+(2017-03-03 17:01:29) datetime_tab : 2017-03-03 17:00:00
+(2017-03-03 17:01:29) hm : 1
+(2017-03-03 17:01:29) latitude : -1.133466
+(2017-03-03 17:01:29) longitude : 114.49198
+(2017-03-03 17:01:29) altitude : 83.6
+(2017-03-03 17:01:29) accuracy : 6.5
+(2017-03-03 17:01:29) altitude_accuracy : -
+(2017-03-03 17:01:29) heading : 292
+(2017-03-03 17:01:29) speed : 0
+(2017-03-03 17:01:29) time_stamp_gps : 2017-03-03 17:00:00
+(2017-03-03 17:01:29) Masuk ke function login_daily_absent
+(2017-03-03 17:01:29) Status = login
+(2017-03-03 17:01:29) 1020 : SELECT *, count(*) as total FROM daily_absent WHERE nip='KB10004'  AND date = '2017-03-02' AND date_out IS NULL AND time_out IS NULL
+(2017-03-03 17:01:29) 1028 : SELECT count(*) as total FROM daily_absent WHERE nip='KB10004'  AND date = '2017-03-03'  AND date_out IS NULL AND time_out IS NULL
+(2017-03-03 17:01:29) 1056 : INSERT INTO daily_absent ( NIP, DATE, SHIFT, TIME_IN, TIME_START_POSITION_STATION, LATITUDE_START, LONGITUDE_START, DEVICE_ID, UNIT, HM_AWAL ) VALUES ( 'KB10004', '2017-03-03', '2', '17:00:00', '2017-03-03 17:00:00', '-1.133466', '114.49198', '64ed9497054f143', 'Testdwi', '1' )
+(2017-03-03 17:01:29) masuk ke function insert_log_cycle_time
+(2017-03-03 17:01:29) 1871 : SELECT *, count(*) as total FROM log_cycle_time WHERE nip = 'KB10004' AND unit = 'Testdwi' AND  DATE_FORMAT(date_in,'%Y-%m-%d')='2017-03-02' AND datetime_end IS NULL 
+(2017-03-03 17:01:29) 1979 : SELECT *, count(*) as total FROM log_cycle_time WHERE nip = 'KB10004' AND unit = 'Testdwi' AND  DATE_FORMAT(date_in,'%Y-%m-%d')='2017-03-03' AND datetime_end IS NULL 
+(2017-03-03 17:01:29) 1898 : INSERT INTO log_cycle_time ( DEVICE_ID, NIP, UNIT, DATETIME_START, LATITUDE_START, LONGITUDE_START ) VALUES ( '64ed9497054f143', 'KB10004', 'Testdwi', '2017-03-03 17:00:00', '-1.133466', '114.49198' )
+(2017-03-03 17:01:29) masuk ke function insert_update_current_unit_position
+(2017-03-03 17:01:29) 1074 : SELECT unit_position_id, count(*) as total FROM current_unit_position WHERE unit='Testdwi' GROUP BY unit_position_id
+(2017-03-03 17:01:29) 1097 : INSERT INTO current_unit_position ( DEVICE_ID, NIP, UNIT, TIME_STAMP, LATITUDE, LONGITUDE, ALTITUDE, ACCURACY, ALTITUDE_ACCURACY, HEADING, SPEED, DATE_LAST_UPDATE ) VALUES ( '64ed9497054f143', 'KB10004', 'Testdwi', '2017-03-03 17:00:00', '-1.133466', '114.49198', '83.6', '6.5', '-', '292', '0', '2017-03-03 17:00:00' )
+(2017-03-03 17:01:29) masuk ke function insert_log_geolocation 
+(2017-03-03 17:01:29) 1155 : INSERT INTO log_geolocation ( DEVICE_ID, NIP, UNIT, TIME_STAMP, TIME_STAMP_GPS, LATITUDE, LONGITUDE, ALTITUDE, ACCURACY, ALTITUDE_ACCURACY, HEADING, SPEED, STATUS, HM ) VALUES ( '64ed9497054f143', 'KB10004', 'Testdwi', '2017-03-03 17:00:00', '2017-03-03 17:00:00', '-1.133466', '114.49198', '83.6', '6.5', '-', '292', '0', 'login', '1' )
+(2017-03-03 17:01:29) masuk ke function insert_log_geolocation 
+(2017-03-03 17:01:29) masuk ke function insert_update_geofences
+(2017-03-03 17:01:29) masuk ke function insert_update_idle_start
+(2017-03-03 17:01:29) masuk ke function update_end_log_cycle_time
+(2017-03-03 17:01:29) 1424 : SELECT *, count(*) as total FROM log_cycle_time WHERE nip = 'KB10004' AND unit = 'Testdwi' AND  DATE_FORMAT(datetime_start,'%Y-%m-%d')='2017-03-02'  AND time_stasiun_cpp IS NOT NULL AND time_stasiun_port IS NOT NULL  AND datetime_end IS NULL GROUP BY cycle_time_id LIMIT 1
+(2017-03-03 17:01:29) 1433 : SELECT *, count(*) as total FROM log_cycle_time WHERE nip = 'KB10004' AND unit = 'Testdwi' AND  DATE_FORMAT(datetime_start,'%Y-%m-%d')='2017-03-03'  AND time_stasiun_cpp IS NOT NULL AND time_stasiun_port IS NOT NULL  AND datetime_end IS NULL GROUP BY cycle_time_id LIMIT 1
+(2017-03-03 17:01:29) masuk ke function logout_daily_absent
+(2017-03-03 17:01:29) ==============================================
+(2017-03-03 17:01:29) 

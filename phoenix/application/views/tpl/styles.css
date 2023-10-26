@@ -1,0 +1,36 @@
+.progress {
+    display: block;
+    text-align: center;
+    width: 0;
+    height: 3px;
+    background: red;
+    transition: width .3s;
+}
+.progress.hide {
+    opacity: 0;
+    transition: opacity 1.3s;
+}
+
+@media (min-width: 768px) { 
+	input[type="text"] {
+		width: 100%;
+		height:60px;
+		padding: 0;
+		font-size: 24px; 
+		padding: 4px;
+	} 
+	input[type="radio"] {
+		width: 100%;
+		height:60px;
+		padding: 0;
+		font-size: 24px; 
+		padding: 4px;
+	} 
+	select {
+		width: 100%;
+		height:60px;
+		padding: 0;
+		font-size: 24px; 
+		padding: 4px;
+	} 
+}
